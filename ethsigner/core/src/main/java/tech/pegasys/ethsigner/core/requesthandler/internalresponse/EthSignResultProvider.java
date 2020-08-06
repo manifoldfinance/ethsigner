@@ -61,10 +61,11 @@ public class EthSignResultProvider implements ResultProvider<String> {
     }
     final TransactionSigner signer = transactionSigner.get();
     final String originalMessage = params.get(1);
-    final String message =
-        (char) 25 + "Ethereum Signed Message:\n" + originalMessage.length() + originalMessage;
-    final Signature signature = signer.sign(message.getBytes(StandardCharsets.UTF_8));
-
+    // final byte[] message = originalMessage.getBytes(StandardCharsets.UTF_8);
+    // final String message = (char) 25 + "Ethereum Signed Message:\n" + originalMessage.length() + originalMessage;
+    // final Signature signature = signer.sign(message);
+    final byte[] message = Numeric.hexStringToByteArray(originalMessage);
+    final Signature signature = signer.sign(message);
     final Bytes outputSignature =
         Bytes.concatenate(
             Bytes32.leftPad(Bytes.wrap(ByteUtils.bigIntegerToBytes(signature.getR()))),
