@@ -32,13 +32,13 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.web3j.utils.Numeric;
 
-public class EthSignTransactionProvider implements ResultProvider<String> {
+public class EthSignDataHandler implements ResultProvider<String> {
 
   private static final Logger LOG = LogManager.getLogger();
 
   private final TransactionSignerProvider transactionSignerProvider;
 
-  public EthSignTransactionProvider(final TransactionSignerProvider transactionSignerProvider) {
+  public EthSignDataHandler(final TransactionSignerProvider transactionSignerProvider) {
     this.transactionSignerProvider = transactionSignerProvider;
   }
 
@@ -47,7 +47,7 @@ public class EthSignTransactionProvider implements ResultProvider<String> {
     final List<String> params = getParams(request);
     if (params == null || params.size() != 2) {
       LOG.info(
-          "eth_sign should have a list of 2 parameters, but has {}",
+          "eth_signData should have a list of 2 parameters, but has {}",
           params == null ? "null" : params.size());
       throw new JsonRpcException(INVALID_PARAMS);
     }
@@ -77,7 +77,7 @@ public class EthSignTransactionProvider implements ResultProvider<String> {
       return params;
     } catch (final ClassCastException e) {
       LOG.info(
-          "eth_sign should have a list of 2 parameters, but received an object: {}",
+          "eth_signData should have a list of parameters, but received an object: {}",
           request.getParams());
       throw new JsonRpcException(INVALID_PARAMS);
     }
