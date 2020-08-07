@@ -23,7 +23,6 @@ import tech.pegasys.signers.secp256k1.api.Signature;
 import tech.pegasys.signers.secp256k1.api.TransactionSigner;
 import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,13 +32,13 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.web3j.utils.Numeric;
 
-public class EthSignResultProvider implements ResultProvider<String> {
+public class EthSignTransactionProvider implements ResultProvider<String> {
 
   private static final Logger LOG = LogManager.getLogger();
 
   private final TransactionSignerProvider transactionSignerProvider;
 
-  public EthSignResultProvider(final TransactionSignerProvider transactionSignerProvider) {
+  public EthSignTransactionProvider(final TransactionSignerProvider transactionSignerProvider) {
     this.transactionSignerProvider = transactionSignerProvider;
   }
 
@@ -61,10 +60,8 @@ public class EthSignResultProvider implements ResultProvider<String> {
     }
     final TransactionSigner signer = transactionSigner.get();
     final String originalMessage = params.get(1);
-    final String message =
-        (char) 25 + "Ethereum Signed Message:\n" + originalMessage.length() + originalMessage;
-    final Signature signature = signer.sign(message.getBytes(StandardCharsets.UTF_8));
-
+    final byte[] message = Numeric.hexStringToByteArray(originalMessage);
+    final Signature signature = signer.sign(message);
     final Bytes outputSignature =
         Bytes.concatenate(
             Bytes32.leftPad(Bytes.wrap(ByteUtils.bigIntegerToBytes(signature.getR()))),
