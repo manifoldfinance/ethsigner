@@ -32,13 +32,13 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.web3j.utils.Numeric;
 
-public class EthSignDataHandler implements ResultProvider<String> {
+public class EthSignDataResultProvider implements ResultProvider<String> {
 
   private static final Logger LOG = LogManager.getLogger();
 
   private final TransactionSignerProvider transactionSignerProvider;
 
-  public EthSignDataHandler(final TransactionSignerProvider transactionSignerProvider) {
+  public EthSignDataResultProvider(final TransactionSignerProvider transactionSignerProvider) {
     this.transactionSignerProvider = transactionSignerProvider;
   }
 

@@ -39,7 +39,7 @@ import org.web3j.crypto.Sign;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.utils.Numeric;
 
-public class EthSignTransactionHandler implements ResultProvider<String> {
+public class EthSignTransactionResultProvider implements ResultProvider<String> {
 
   private static final Logger LOG = LogManager.getLogger();
 
@@ -47,7 +47,7 @@ public class EthSignTransactionHandler implements ResultProvider<String> {
   private final TransactionSignerProvider transactionSignerProvider;
   private final JsonDecoder decoder;
 
-  public EthSignTransactionHandler(
+  public EthSignTransactionResultProvider(
       final long chainId,
       final TransactionSignerProvider transactionSignerProvider,
       final JsonDecoder decoder) {
@@ -88,6 +88,7 @@ public class EthSignTransactionHandler implements ResultProvider<String> {
       throw new JsonRpcException(TX_SENDER_NOT_AUTHORIZED);
     }
     final byte[] bytesToSign = transaction.rlpEncode(chainId);
+
     final Signature signature = transactionSigner.get().sign(bytesToSign);
 
     final Sign.SignatureData web3jSignature =
@@ -124,6 +125,11 @@ public class EthSignTransactionHandler implements ResultProvider<String> {
       object = paramList.get(0);
     } else {
       object = params;
+    }
+    if (object == null) {
+      throw new IllegalArgumentException(
+          type.getSimpleName()
+              + " json Rpc requires a valid parameter, request contained a null object");
     }
     final JsonObject receivedParams = JsonObject.mapFrom(object);
     return decoder.decodeValue(receivedParams.toBuffer(), type);
