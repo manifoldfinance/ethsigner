@@ -23,7 +23,6 @@ import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.EthTransaction;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
-import tech.pegasys.ethsigner.core.util.ByteUtils;
 import tech.pegasys.ethsigner.core.util.HexStringComparator;
 import tech.pegasys.signers.secp256k1.api.Signature;
 import tech.pegasys.signers.secp256k1.api.TransactionSigner;
@@ -36,8 +35,8 @@ import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.bytes.Bytes32;
+import org.web3j.crypto.Sign;
+import org.web3j.crypto.TransactionEncoder;
 import org.web3j.utils.Numeric;
 
 public class EthSignTransactionHandler implements ResultProvider<String> {
@@ -90,12 +89,18 @@ public class EthSignTransactionHandler implements ResultProvider<String> {
     }
     final byte[] bytesToSign = transaction.rlpEncode(chainId);
     final Signature signature = transactionSigner.get().sign(bytesToSign);
-    final Bytes outputSignature =
-        Bytes.concatenate(
-            Bytes32.leftPad(Bytes.wrap(ByteUtils.bigIntegerToBytes(signature.getR()))),
-            Bytes32.leftPad(Bytes.wrap(ByteUtils.bigIntegerToBytes(signature.getS()))),
-            Bytes.wrap(ByteUtils.bigIntegerToBytes(signature.getV())));
-    return Numeric.toHexString(outputSignature.toArray());
+
+    final Sign.SignatureData web3jSignature =
+        new Sign.SignatureData(
+            signature.getV().toByteArray(),
+            signature.getR().toByteArray(),
+            signature.getS().toByteArray());
+
+    final Sign.SignatureData eip155Signature =
+        TransactionEncoder.createEip155SignatureData(web3jSignature, chainId);
+
+    final byte[] serializedBytes = transaction.rlpEncode(eip155Signature);
+    return Numeric.toHexString(serializedBytes);
   }
 
   private Transaction createTransaction(final JsonRpcRequest request) {
@@ -113,7 +118,7 @@ public class EthSignTransactionHandler implements ResultProvider<String> {
       if (paramList.size() != 1) {
         throw new IllegalArgumentException(
             type.getSimpleName()
-                + " json Rpc requires a single parameter, request contained "
+                + " json Rpc requires one parameter, request contained "
                 + paramList.size());
       }
       object = paramList.get(0);
