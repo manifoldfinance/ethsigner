@@ -58,6 +58,8 @@ public class EthSignTransactionResultProvider implements ResultProvider<String> 
 
   @Override
   public String createResponseResult(final JsonRpcRequest request) {
+    // Signs a transaction that can be submitted to the network at a later time using with
+    // eth_sendRawTransaction.
     LOG.debug("Transforming request {}, {}", request.getId(), request.getMethod());
     final Transaction transaction;
     try {

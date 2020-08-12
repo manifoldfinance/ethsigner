@@ -22,7 +22,6 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitter;
 import tech.pegasys.ethsigner.core.requesthandler.VertxRequestTransmitterFactory;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthAccountsResultProvider;
-import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthSignDataResultProvider;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthSignResultProvider;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthSignTransactionResultProvider;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.InternalResponseHandler;
@@ -178,10 +177,6 @@ public class Runner {
         new InternalResponseHandler<>(
             responseFactory,
             new EthSignTransactionResultProvider(chainId, transactionSignerProvider, jsonDecoder)));
-    requestMapper.addHandler(
-        "eth_signData",
-        new InternalResponseHandler<>(
-            responseFactory, new EthSignDataResultProvider(transactionSignerProvider)));
     return requestMapper;
   }
 
