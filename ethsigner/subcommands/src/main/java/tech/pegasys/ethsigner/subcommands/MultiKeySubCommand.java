@@ -58,31 +58,38 @@ public class MultiKeySubCommand extends SignerSubCommand {
   private Path directoryPath;
 
   @Option(
-      names = {"-l", "--library"},
-      description = "The HSM PKCS11 library used to sign transactions.",
-      paramLabel = "<LIBRARY_PATH>",
+      names = {"-c", "--config"},
+      description = "Config for signer providers.",
+      paramLabel = "<CONFIG>",
       required = false)
-  private Path libraryPath;
+  private Path configPath;
 
-  @Option(
-      names = {"-s", "--slot-label"},
-      description = "The HSM slot used to sign transactions.",
-      paramLabel = "<SLOT_LABEL>",
-      required = false)
-  private String slotLabel;
-
-  @Option(
-      names = {"-p", "--slot-pin"},
-      description = "The crypto user pin of the HSM slot used to sign transactions.",
-      paramLabel = "<SLOT_PIN>",
-      required = false)
-  private String slotPin;
+//  @Option(
+//      names = {"-l", "--library"},
+//      description = "The HSM PKCS11 library used to sign transactions.",
+//      paramLabel = "<LIBRARY_PATH>",
+//      required = false)
+//  private Path libraryPath;
+//
+//  @Option(
+//      names = {"-s", "--slot-label"},
+//      description = "The HSM slot used to sign transactions.",
+//      paramLabel = "<SLOT_LABEL>",
+//      required = false)
+//  private String slotLabel;
+//
+//  @Option(
+//      names = {"-p", "--slot-pin"},
+//      description = "The crypto user pin of the HSM slot used to sign transactions.",
+//      paramLabel = "<SLOT_PIN>",
+//      required = false)
+//  private String slotPin;
 
   @Override
   public TransactionSignerProvider createSignerFactory()
       throws TransactionSignerInitializationException {
     return MultiKeyTransactionSignerProvider.create(
-        directoryPath, libraryPath != null ? libraryPath.toString() : null, slotLabel, slotPin);
+        directoryPath, configPath);
   }
 
   @Override
