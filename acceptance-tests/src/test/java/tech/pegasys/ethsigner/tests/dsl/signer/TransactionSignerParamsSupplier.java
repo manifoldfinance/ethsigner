@@ -31,13 +31,13 @@ import java.util.Optional;
 
 import com.google.common.io.Resources;
 
-public class TransactionSignerParamsSupplier {
+public class SignerParamsSupplier {
 
   private final HashicorpSigningParams hashicorpNode;
   private final String azureKeyVault;
   private final Path multiKeySignerDirectory;
 
-  public TransactionSignerParamsSupplier(
+  public SignerParamsSupplier(
       final HashicorpSigningParams hashicorpNode,
       final String azureKeyVault,
       final Path multiKeySignerDirectory) {

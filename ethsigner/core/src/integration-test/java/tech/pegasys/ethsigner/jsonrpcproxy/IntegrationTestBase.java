@@ -35,9 +35,9 @@ import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthResponseFactory;
 import tech.pegasys.ethsigner.jsonrpcproxy.model.response.EthSignerResponse;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.MockServer;
 import tech.pegasys.ethsigner.jsonrpcproxy.support.RestAssuredConverter;
-import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
+import tech.pegasys.signers.secp256k1.api.Signer;
+import tech.pegasys.signers.secp256k1.api.SignerProvider;
 import tech.pegasys.signers.secp256k1.filebased.FileBasedSignerFactory;
 
 import java.io.File;
@@ -116,8 +116,8 @@ public class IntegrationTestBase {
     final File passwordFile = createFile("password");
     credentials = WalletUtils.loadCredentials("password", keyFile);
 
-    final TransactionSignerProvider transactionSignerProvider =
-        new SingleTransactionSignerProvider(transactionSigner(keyFile, passwordFile));
+    final SignerProvider SignerProvider =
+        new SingleSignerProvider(Signer(keyFile, passwordFile));
 
     final HttpClientOptions httpClientOptions = new HttpClientOptions();
     httpClientOptions.setDefaultHost(LOCALHOST);
@@ -138,7 +138,7 @@ public class IntegrationTestBase {
     runner =
         new Runner(
             chainId,
-            transactionSignerProvider,
+            SignerProvider,
             httpClientOptions,
             httpServerOptions,
             downstreamTimeout,
@@ -160,7 +160,7 @@ public class IntegrationTestBase {
         clientAndServer.getLocalPort());
 
     unlockedAccount =
-        transactionSignerProvider.availableAddresses().stream().findAny().orElseThrow();
+        SignerProvider.availableAddresses().stream().findAny().orElseThrow();
   }
 
   Web3j jsonRpc() {
@@ -312,7 +312,7 @@ public class IntegrationTestBase {
             .withHeaders(MockServer.headers(headers)));
   }
 
-  private static TransactionSigner transactionSigner(final File keyFile, final File passwordFile) {
+  private static Signer Signer(final File keyFile, final File passwordFile) {
     return FileBasedSignerFactory.createSigner(keyFile.toPath(), passwordFile.toPath());
   }
 

@@ -19,7 +19,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class MultiKeyAzureTransactionSignerAcceptanceTest
+public class MultiKeyAzureSignerAcceptanceTest
     extends MultiKeyTransactionSigningAcceptanceTestBase {
 
   static final String clientId = System.getenv("ETHSIGNER_AZURE_CLIENT_ID");

@@ -25,8 +25,8 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Et
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
 import tech.pegasys.ethsigner.core.util.HexStringComparator;
 import tech.pegasys.signers.secp256k1.api.Signature;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.Signer;
+import tech.pegasys.signers.secp256k1.api.SignerProvider;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,15 +44,15 @@ public class EthSignTransactionResultProvider implements ResultProvider<String> 
   private static final Logger LOG = LogManager.getLogger();
 
   private final long chainId;
-  private final TransactionSignerProvider transactionSignerProvider;
+  private final SignerProvider SignerProvider;
   private final JsonDecoder decoder;
 
   public EthSignTransactionResultProvider(
       final long chainId,
-      final TransactionSignerProvider transactionSignerProvider,
+      final SignerProvider SignerProvider,
       final JsonDecoder decoder) {
     this.chainId = chainId;
-    this.transactionSignerProvider = transactionSignerProvider;
+    this.SignerProvider = SignerProvider;
     this.decoder = decoder;
   }
 
@@ -73,25 +73,25 @@ public class EthSignTransactionResultProvider implements ResultProvider<String> 
       throw new JsonRpcException(INVALID_PARAMS);
     }
 
-    final Optional<TransactionSigner> transactionSigner =
-        transactionSignerProvider.getSigner(transaction.sender());
+    final Optional<Signer> Signer =
+        SignerProvider.getSigner(transaction.sender());
 
-    if (transactionSigner.isEmpty()) {
+    if (Signer.isEmpty()) {
       LOG.info("From address ({}) does not match any available account", transaction.sender());
       throw new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
     }
 
     final HexStringComparator comparator = new HexStringComparator();
-    if (comparator.compare(transactionSigner.get().getAddress(), transaction.sender()) != 0) {
+    if (comparator.compare(Signer.get().getAddress(), transaction.sender()) != 0) {
       LOG.info(
           "Ethereum address derived from identifier ({}) is incorrect value ({})",
           transaction.sender(),
-          transactionSigner.get().getAddress());
+          Signer.get().getAddress());
       throw new JsonRpcException(TX_SENDER_NOT_AUTHORIZED);
     }
     final byte[] bytesToSign = transaction.rlpEncode(chainId);
 
-    final Signature signature = transactionSigner.get().sign(bytesToSign);
+    final Signature signature = Signer.get().sign(bytesToSign);
 
     final Sign.SignatureData web3jSignature =
         new Sign.SignatureData(

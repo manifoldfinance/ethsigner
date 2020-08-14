@@ -126,7 +126,7 @@ public abstract class EthSignerRunner {
     params.addAll(createServerTlsArgs());
     params.addAll(createDownstreamTlsArgs());
 
-    params.addAll(signerConfig.transactionSignerParamsSupplier().get());
+    params.addAll(signerConfig.SignerParamsSupplier().get());
 
     LOG.info("Creating EthSigner process with params {}", params);
 

@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class MultiKeyHashicorpTransactionSignerAcceptanceTest
+public class MultiKeyHashicorpSignerAcceptanceTest
     extends MultiKeyTransactionSigningAcceptanceTestBase {
 
   static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";

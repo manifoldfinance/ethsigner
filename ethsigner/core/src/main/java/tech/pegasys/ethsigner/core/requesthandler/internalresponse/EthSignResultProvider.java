@@ -20,8 +20,8 @@ import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
 import tech.pegasys.ethsigner.core.util.ByteUtils;
 import tech.pegasys.signers.secp256k1.api.Signature;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.Signer;
+import tech.pegasys.signers.secp256k1.api.SignerProvider;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -37,10 +37,10 @@ public class EthSignResultProvider implements ResultProvider<String> {
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private final TransactionSignerProvider transactionSignerProvider;
+  private final SignerProvider SignerProvider;
 
-  public EthSignResultProvider(final TransactionSignerProvider transactionSignerProvider) {
-    this.transactionSignerProvider = transactionSignerProvider;
+  public EthSignResultProvider(final SignerProvider SignerProvider) {
+    this.SignerProvider = SignerProvider;
   }
 
   @Override
@@ -53,13 +53,13 @@ public class EthSignResultProvider implements ResultProvider<String> {
       throw new JsonRpcException(INVALID_PARAMS);
     }
     final String address = params.get(0);
-    final Optional<TransactionSigner> transactionSigner =
-        transactionSignerProvider.getSigner(address);
-    if (transactionSigner.isEmpty()) {
+    final Optional<Signer> Signer =
+        SignerProvider.getSigner(address);
+    if (Signer.isEmpty()) {
       LOG.info("Address ({}) does not match any available account", address);
       throw new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
     }
-    final TransactionSigner signer = transactionSigner.get();
+    final Signer signer = Signer.get();
     final String originalMessage = params.get(1);
     final String message =
         (char) 25 + "Ethereum Signed Message:\n" + originalMessage.length() + originalMessage;

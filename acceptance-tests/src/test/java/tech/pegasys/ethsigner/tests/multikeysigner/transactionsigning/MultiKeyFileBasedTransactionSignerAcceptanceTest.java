@@ -24,7 +24,7 @@ import com.google.common.io.Resources;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-public class MultiKeyFileBasedTransactionSignerAcceptanceTest
+public class MultiKeyFileBasedSignerAcceptanceTest
     extends MultiKeyTransactionSigningAcceptanceTestBase {
 
   static final String FILENAME = "fe3b557e8fb62b89f4916b721be55ceb828dbd73";

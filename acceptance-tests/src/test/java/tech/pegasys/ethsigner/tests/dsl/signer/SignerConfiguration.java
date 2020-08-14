@@ -29,7 +29,7 @@ public class SignerConfiguration {
   private final String hostname;
   private final int httpRpcPort;
   private final int webSocketPort;
-  private final TransactionSignerParamsSupplier transactionSignerParamsSupplier;
+  private final SignerParamsSupplier SignerParamsSupplier;
   private final Optional<TlsOptions> serverTlsOptions;
   private final Optional<ClientTlsOptions> clientTlsOptions;
   private final Optional<TlsCertificateDefinition> overriddenCaTrustStore;
@@ -39,7 +39,7 @@ public class SignerConfiguration {
       final String hostname,
       final int httpRpcPort,
       final int webSocketPort,
-      final TransactionSignerParamsSupplier transactionSignerParamsSupplier,
+      final SignerParamsSupplier SignerParamsSupplier,
       final Optional<TlsOptions> serverTlsOptions,
       final Optional<ClientTlsOptions> clientTlsOptions,
       final Optional<TlsCertificateDefinition> overriddenCaTrustStore) {
@@ -47,7 +47,7 @@ public class SignerConfiguration {
     this.hostname = hostname;
     this.httpRpcPort = httpRpcPort;
     this.webSocketPort = webSocketPort;
-    this.transactionSignerParamsSupplier = transactionSignerParamsSupplier;
+    this.SignerParamsSupplier = SignerParamsSupplier;
     this.serverTlsOptions = serverTlsOptions;
     this.clientTlsOptions = clientTlsOptions;
     this.overriddenCaTrustStore = overriddenCaTrustStore;
@@ -89,8 +89,8 @@ public class SignerConfiguration {
     return overriddenCaTrustStore;
   }
 
-  public TransactionSignerParamsSupplier transactionSignerParamsSupplier() {
-    return transactionSignerParamsSupplier;
+  public SignerParamsSupplier SignerParamsSupplier() {
+    return SignerParamsSupplier;
   }
 
   public boolean isDynamicPortAllocation() {

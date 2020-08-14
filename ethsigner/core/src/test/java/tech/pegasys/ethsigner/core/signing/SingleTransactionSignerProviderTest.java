@@ -16,8 +16,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
+import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
+import tech.pegasys.signers.secp256k1.api.Signer;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -26,26 +26,26 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class SingleTransactionSignerProviderTest {
+class SingleSignerProviderTest {
 
-  private TransactionSigner transactionSigner;
-  private SingleTransactionSignerProvider signerFactory;
+  private Signer Signer;
+  private SingleSignerProvider signerFactory;
 
   @BeforeEach
   void beforeEach() {
-    transactionSigner = mock(TransactionSigner.class);
-    signerFactory = new SingleTransactionSignerProvider(transactionSigner);
+    Signer = mock(Signer.class);
+    signerFactory = new SingleSignerProvider(Signer);
   }
 
   @Test
   void whenSignerIsNullFactoryCreationFails() {
     Assertions.assertThrows(
-        IllegalArgumentException.class, () -> new SingleTransactionSignerProvider(null));
+        IllegalArgumentException.class, () -> new SingleSignerProvider(null));
   }
 
   @Test
   void whenSignerAddressIsNullFactoryAvailableAddressesShouldReturnEmptySet() {
-    when(transactionSigner.getAddress()).thenReturn(null);
+    when(Signer.getAddress()).thenReturn(null);
 
     final Collection<String> addresses = signerFactory.availableAddresses();
     assertThat(addresses).isEmpty();
@@ -53,23 +53,23 @@ class SingleTransactionSignerProviderTest {
 
   @Test
   void whenSignerAddressIsNullFactoryGetSignerShouldReturnEmpty() {
-    when(transactionSigner.getAddress()).thenReturn(null);
+    when(Signer.getAddress()).thenReturn(null);
 
-    final Optional<TransactionSigner> signer = signerFactory.getSigner("0x0");
+    final Optional<Signer> signer = signerFactory.getSigner("0x0");
     assertThat(signer).isEmpty();
   }
 
   @Test
   void whenGetSignerWithMatchingAccountShouldReturnSigner() {
-    when(transactionSigner.getAddress()).thenReturn("0x0");
+    when(Signer.getAddress()).thenReturn("0x0");
 
-    final Optional<TransactionSigner> signer = signerFactory.getSigner("0x0");
+    final Optional<Signer> signer = signerFactory.getSigner("0x0");
     assertThat(signer).isNotEmpty();
   }
 
   @Test
   void getSignerAddressIsCaseInsensitive() {
-    when(transactionSigner.getAddress()).thenReturn("0xa");
+    when(Signer.getAddress()).thenReturn("0xa");
 
     assertThat(signerFactory.getSigner("0xa")).isNotEmpty();
     assertThat(signerFactory.getSigner("0xA")).isNotEmpty();
@@ -82,15 +82,15 @@ class SingleTransactionSignerProviderTest {
 
   @Test
   void whenGetSignerWithDifferentSignerAccountShouldReturnEmpty() {
-    when(transactionSigner.getAddress()).thenReturn("0x0");
+    when(Signer.getAddress()).thenReturn("0x0");
 
-    final Optional<TransactionSigner> signer = signerFactory.getSigner("0x1");
+    final Optional<Signer> signer = signerFactory.getSigner("0x1");
     assertThat(signer).isEmpty();
   }
 
   @Test
   void whenGetAvailableAddressesShouldReturnSignerAddress() {
-    when(transactionSigner.getAddress()).thenReturn("0x0");
+    when(Signer.getAddress()).thenReturn("0x0");
 
     final Collection<String> addresses = signerFactory.availableAddresses();
     assertThat(addresses).containsExactly("0x0");

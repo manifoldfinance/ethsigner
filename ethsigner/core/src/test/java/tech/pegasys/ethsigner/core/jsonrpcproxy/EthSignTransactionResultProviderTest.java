@@ -28,8 +28,8 @@ import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthSignTransactionResultProvider;
 import tech.pegasys.signers.secp256k1.api.Signature;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.Signer;
+import tech.pegasys.signers.secp256k1.api.SignerProvider;
 
 import java.math.BigInteger;
 import java.util.Collections;
@@ -70,7 +70,7 @@ public class EthSignTransactionResultProviderTest {
   @NullSource
   public void ifParamIsInvalidExceptionIsThrownWithInvalidParams(final Object params) {
 
-    final TransactionSignerProvider mockSignerProvider = mock(TransactionSignerProvider.class);
+    final SignerProvider mockSignerProvider = mock(SignerProvider.class);
     final EthSignTransactionResultProvider resultProvider =
         new EthSignTransactionResultProvider(chainId, mockSignerProvider, jsonDecoder);
 
@@ -86,7 +86,7 @@ public class EthSignTransactionResultProviderTest {
 
   @Test
   public void ifAddressIsNotUnlockedExceptionIsThrownWithSigningNotUnlocked() {
-    final TransactionSignerProvider mockSignerProvider = mock(TransactionSignerProvider.class);
+    final SignerProvider mockSignerProvider = mock(SignerProvider.class);
     final EthSignTransactionResultProvider resultProvider =
         new EthSignTransactionResultProvider(chainId, mockSignerProvider, jsonDecoder);
 
@@ -101,14 +101,14 @@ public class EthSignTransactionResultProviderTest {
 
   @Test
   public void signatureHasTheExpectedFormat() {
-    final TransactionSigner mockTransactionSigner = mock(TransactionSigner.class);
-    doReturn("0xf17f52151ebef6c7334fad080c5704d77216b732").when(mockTransactionSigner).getAddress();
+    final Signer mockSigner = mock(Signer.class);
+    doReturn("0xf17f52151ebef6c7334fad080c5704d77216b732").when(mockSigner).getAddress();
     final BigInteger v = BigInteger.ONE;
     final BigInteger r = BigInteger.TWO;
     final BigInteger s = BigInteger.TEN;
-    doReturn(new Signature(v, r, s)).when(mockTransactionSigner).sign(any(byte[].class));
-    final TransactionSignerProvider mockSignerProvider = mock(TransactionSignerProvider.class);
-    doReturn(Optional.of(mockTransactionSigner)).when(mockSignerProvider).getSigner(anyString());
+    doReturn(new Signature(v, r, s)).when(mockSigner).sign(any(byte[].class));
+    final SignerProvider mockSignerProvider = mock(SignerProvider.class);
+    doReturn(Optional.of(mockSigner)).when(mockSignerProvider).getSigner(anyString());
     final EthSignTransactionResultProvider resultProvider =
         new EthSignTransactionResultProvider(chainId, mockSignerProvider, jsonDecoder);
 
@@ -129,8 +129,8 @@ public class EthSignTransactionResultProviderTest {
         Credentials.create("0x1618fc3e47aec7e70451256e033b9edb67f4c469258d8e2fbb105552f141ae41");
     String addr = cs.getAddress();
 
-    final TransactionSigner mockTransactionSigner = mock(TransactionSigner.class);
-    doReturn(addr).when(mockTransactionSigner).getAddress();
+    final Signer mockSigner = mock(Signer.class);
+    doReturn(addr).when(mockSigner).getAddress();
 
     doAnswer(
             answer -> {
@@ -142,10 +142,10 @@ public class EthSignTransactionResultProviderTest {
                   new BigInteger(1, signature.getR()),
                   new BigInteger(1, signature.getS()));
             })
-        .when(mockTransactionSigner)
+        .when(mockSigner)
         .sign(any(byte[].class));
-    final TransactionSignerProvider mockSignerProvider = mock(TransactionSignerProvider.class);
-    doReturn(Optional.of(mockTransactionSigner)).when(mockSignerProvider).getSigner(anyString());
+    final SignerProvider mockSignerProvider = mock(SignerProvider.class);
+    doReturn(Optional.of(mockSigner)).when(mockSignerProvider).getSigner(anyString());
     final EthSignTransactionResultProvider resultProvider =
         new EthSignTransactionResultProvider(chainId, mockSignerProvider, jsonDecoder);
 

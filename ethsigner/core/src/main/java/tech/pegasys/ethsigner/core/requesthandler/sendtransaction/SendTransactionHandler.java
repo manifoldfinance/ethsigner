@@ -26,8 +26,8 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Tr
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.TransactionFactory;
 import tech.pegasys.ethsigner.core.signing.TransactionSerializer;
 import tech.pegasys.ethsigner.core.util.HexStringComparator;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.Signer;
+import tech.pegasys.signers.secp256k1.api.SignerProvider;
 
 import java.util.Optional;
 
@@ -41,7 +41,7 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
   private static final Logger LOG = LogManager.getLogger();
 
   private final long chainId;
-  private final TransactionSignerProvider transactionSignerProvider;
+  private final SignerProvider SignerProvider;
   private final TransactionFactory transactionFactory;
   private final VertxRequestTransmitterFactory vertxTransmitterFactory;
 
@@ -49,11 +49,11 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
 
   public SendTransactionHandler(
       final long chainId,
-      final TransactionSignerProvider transactionSignerProvider,
+      final SignerProvider SignerProvider,
       final TransactionFactory transactionFactory,
       final VertxRequestTransmitterFactory vertxTransmitterFactory) {
     this.chainId = chainId;
-    this.transactionSignerProvider = transactionSignerProvider;
+    this.SignerProvider = SignerProvider;
     this.transactionFactory = transactionFactory;
     this.vertxTransmitterFactory = vertxTransmitterFactory;
   }
@@ -74,10 +74,10 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
       return;
     }
 
-    final Optional<TransactionSigner> transactionSigner =
-        transactionSignerProvider.getSigner(transaction.sender());
+    final Optional<Signer> Signer =
+        SignerProvider.getSigner(transaction.sender());
 
-    if (transactionSigner.isEmpty()) {
+    if (Signer.isEmpty()) {
       LOG.info("From address ({}) does not match any available account", transaction.sender());
       context.fail(
           BAD_REQUEST.code(), new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT));
@@ -85,17 +85,17 @@ public class SendTransactionHandler implements JsonRpcRequestHandler {
     }
 
     final HexStringComparator comparator = new HexStringComparator();
-    if (comparator.compare(transactionSigner.get().getAddress(), transaction.sender()) != 0) {
+    if (comparator.compare(Signer.get().getAddress(), transaction.sender()) != 0) {
       LOG.info(
           "Ethereum address derived from identifier ({}) is incorrect value ({})",
           transaction.sender(),
-          transactionSigner.get().getAddress());
+          Signer.get().getAddress());
       context.fail(INTERNAL_SERVER_ERROR.code(), new JsonRpcException(TX_SENDER_NOT_AUTHORIZED));
       return;
     }
 
     final TransactionSerializer transactionSerializer =
-        new TransactionSerializer(transactionSigner.get(), chainId);
+        new TransactionSerializer(Signer.get(), chainId);
     sendTransaction(transaction, transactionSerializer, context, request);
   }
 

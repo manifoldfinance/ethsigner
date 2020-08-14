@@ -80,14 +80,14 @@ public class SignerConfigurationBuilder {
   }
 
   public SignerConfiguration build() {
-    final TransactionSignerParamsSupplier transactionSignerParamsSupplier =
-        new TransactionSignerParamsSupplier(hashicorpNode, keyVaultName, multiKeySignerDirectory);
+    final SignerParamsSupplier SignerParamsSupplier =
+        new SignerParamsSupplier(hashicorpNode, keyVaultName, multiKeySignerDirectory);
     return new SignerConfiguration(
         CHAIN_ID,
         LOCALHOST,
         httpRpcPort,
         webSocketPort,
-        transactionSignerParamsSupplier,
+        SignerParamsSupplier,
         Optional.ofNullable(serverTlsOptions),
         Optional.ofNullable(clientTlsOptions),
         Optional.ofNullable(overriddenCaTrustStore));

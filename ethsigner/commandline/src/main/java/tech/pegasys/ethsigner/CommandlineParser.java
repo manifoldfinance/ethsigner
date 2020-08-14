@@ -18,7 +18,7 @@ import tech.pegasys.ethsigner.core.InitializationException;
 import tech.pegasys.ethsigner.valueprovider.CascadingDefaultProvider;
 import tech.pegasys.ethsigner.valueprovider.EnvironmentVariableDefaultProvider;
 import tech.pegasys.ethsigner.valueprovider.TomlConfigFileDefaultProvider;
-import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
+import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -145,7 +145,7 @@ public class CommandlineParser {
       final CommandLine commandLine,
       final CommandLine.ParseResult parseResult) {
 
-    if (ex instanceof TransactionSignerInitializationException) {
+    if (ex instanceof SignerInitializationException) {
       errorWriter.println(SIGNER_CREATION_ERROR);
       errorWriter.println("Cause: " + ex.getMessage());
     } else if (ex instanceof InitializationException) {
