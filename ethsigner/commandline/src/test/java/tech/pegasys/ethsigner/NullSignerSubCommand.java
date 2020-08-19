@@ -16,6 +16,7 @@ import tech.pegasys.signers.secp256k1.api.Signer;
 import tech.pegasys.signers.secp256k1.api.SignerProvider;
 import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
 
+import java.security.interfaces.ECPublicKey;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -46,8 +47,7 @@ public class NullSignerSubCommand extends SignerSubCommand {
   }
 
   @Override
-  public SignerProvider createSignerFactory()
-      throws SignerInitializationException {
+  public SignerProvider createSignerFactory() throws SignerInitializationException {
     return new EmptySignerProvider();
   }
 
@@ -68,12 +68,12 @@ public class NullSignerSubCommand extends SignerSubCommand {
   public static class EmptySignerProvider implements SignerProvider {
 
     @Override
-    public Optional<Signer> getSigner(final String address) {
+    public Optional<Signer> getSigner(final ECPublicKey pubKey) {
       return Optional.empty();
     }
 
     @Override
-    public Set<String> availableAddresses() {
+    public Set<ECPublicKey> availablePublicKeys() {
       return Collections.emptySet();
     }
   }

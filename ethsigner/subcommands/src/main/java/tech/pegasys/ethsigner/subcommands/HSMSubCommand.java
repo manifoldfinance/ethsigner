@@ -14,9 +14,10 @@ package tech.pegasys.ethsigner.subcommands;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.signers.hsm.HSMConfig;
-import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
+import tech.pegasys.signers.hsm.HSMWalletProvider;
 import tech.pegasys.signers.secp256k1.api.Signer;
 import tech.pegasys.signers.secp256k1.api.SignerProvider;
+import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
 import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
 import tech.pegasys.signers.secp256k1.hsm.HSMSignerFactory;
 
@@ -73,14 +74,15 @@ public class HSMSubCommand extends SignerSubCommand {
   private String ethAddress;
 
   private Signer createSigner() throws SignerInitializationException {
-    HSMSignerFactory factory =
-        new HSMSignerFactory(new HSMConfig(libraryPath != null ? libraryPath.toString() : null, slotLabel, slotPin));
+    final HSMConfig config =
+        new HSMConfig(libraryPath != null ? libraryPath.toString() : null, slotLabel, slotPin);
+    final HSMWalletProvider provider = new HSMWalletProvider(config);
+    final HSMSignerFactory factory = new HSMSignerFactory(provider);
     return factory.createSigner(ethAddress);
   }
 
   @Override
-  public SignerProvider createSignerFactory()
-      throws SignerInitializationException {
+  public SignerProvider createSignerFactory() throws SignerInitializationException {
     return new SingleSignerProvider(createSigner());
   }
 

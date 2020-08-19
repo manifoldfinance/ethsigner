@@ -12,9 +12,12 @@
  */
 package tech.pegasys.ethsigner.subcommands;
 
-import static tech.pegasys.ethsigner.DefaultCommandValues.MANDATORY_PATH_FORMAT_HELP;
+import static tech.pegasys.ethsigner.DefaultCommandValues.PATH_FORMAT_HELP;
+import static tech.pegasys.ethsigner.util.RequiredOptionsUtil.checkIfRequiredOptionsAreInitialized;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.ethsigner.annotations.RequiredOption;
+import tech.pegasys.ethsigner.core.InitializationException;
 import tech.pegasys.signers.secp256k1.api.SignerProvider;
 import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
 import tech.pegasys.signers.secp256k1.multikey.MultiKeySignerProvider;
@@ -49,47 +52,52 @@ public class MultiKeySubCommand extends SignerSubCommand {
   @Spec
   private CommandLine.Model.CommandSpec spec;
 
+  @RequiredOption
   @Option(
       names = {"-d", "--directory"},
       description = "The path to a directory containing signing metadata TOML files",
-      required = true,
-      paramLabel = MANDATORY_PATH_FORMAT_HELP,
+      paramLabel = PATH_FORMAT_HELP,
       arity = "1")
   private Path directoryPath;
 
   @Option(
       names = {"-c", "--config"},
-      description = "Config for signer providers.",
-      paramLabel = "<CONFIG>",
+      description = "The path to a config file to initialize signer providers",
+      paramLabel = PATH_FORMAT_HELP,
+      arity = "1",
       required = false)
   private Path configPath;
 
-//  @Option(
-//      names = {"-l", "--library"},
-//      description = "The HSM PKCS11 library used to sign transactions.",
-//      paramLabel = "<LIBRARY_PATH>",
-//      required = false)
-//  private Path libraryPath;
-//
-//  @Option(
-//      names = {"-s", "--slot-label"},
-//      description = "The HSM slot used to sign transactions.",
-//      paramLabel = "<SLOT_LABEL>",
-//      required = false)
-//  private String slotLabel;
-//
-//  @Option(
-//      names = {"-p", "--slot-pin"},
-//      description = "The crypto user pin of the HSM slot used to sign transactions.",
-//      paramLabel = "<SLOT_PIN>",
-//      required = false)
-//  private String slotPin;
+  //  @Option(
+  //      names = {"-l", "--library"},
+  //      description = "The HSM PKCS11 library used to sign transactions.",
+  //      paramLabel = "<LIBRARY_PATH>",
+  //      required = false)
+  //  private Path libraryPath;
+  //
+  //  @Option(
+  //      names = {"-s", "--slot-label"},
+  //      description = "The HSM slot used to sign transactions.",
+  //      paramLabel = "<SLOT_LABEL>",
+  //      required = false)
+  //  private String slotLabel;
+  //
+  //  @Option(
+  //      names = {"-p", "--slot-pin"},
+  //      description = "The crypto user pin of the HSM slot used to sign transactions.",
+  //      paramLabel = "<SLOT_PIN>",
+  //      required = false)
+  //  private String slotPin;
 
   @Override
-  public SignerProvider createSignerFactory()
-      throws SignerInitializationException {
-    return MultiKeySignerProvider.create(
-        directoryPath, configPath, null);
+  protected void validateArgs() throws InitializationException {
+    checkIfRequiredOptionsAreInitialized(this);
+    super.validateArgs();
+  }
+
+  @Override
+  public SignerProvider createSignerFactory() throws SignerInitializationException {
+    return MultiKeySignerProvider.create(directoryPath, configPath, new EthSignerFileSelector());
   }
 
   @Override

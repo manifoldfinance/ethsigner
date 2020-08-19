@@ -40,12 +40,12 @@ public final class EthSigner {
   private static final Logger LOG = LogManager.getLogger();
 
   private final Config config;
-  private final SignerProvider SignerProvider;
+  private final AddressIndexedSignerProvider signerProvider;
   private final WebClientOptionsFactory webClientOptionsFactory = new WebClientOptionsFactory();
 
-  public EthSigner(final Config config, final SignerProvider SignerProvider) {
+  public EthSigner(final Config config, final SignerProvider signerProvider) {
     this.config = config;
-    this.SignerProvider = SignerProvider;
+    this.signerProvider = AddressIndexedSignerProvider.create(signerProvider);
   }
 
   public void run() {
@@ -76,7 +76,7 @@ public final class EthSigner {
       final Runner runner =
           new Runner(
               config.getChainId().id(),
-              SignerProvider,
+              signerProvider,
               webClientOptionsFactory.createWebClientOptions(config),
               applyConfigTlsSettingsTo(serverOptions),
               downstreamHttpRequestTimeout,
@@ -97,7 +97,7 @@ public final class EthSigner {
   class Shutdown extends Thread {
     @Override
     public void run() {
-      SignerProvider.shutdown();
+      signerProvider.shutdown();
       System.out.println("Shutting down EthSigner");
     }
   }

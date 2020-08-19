@@ -31,13 +31,13 @@ import java.util.Optional;
 
 import com.google.common.io.Resources;
 
-public class SignerParamsSupplier {
+public class TransactionSignerParamsSupplier {
 
   private final HashicorpSigningParams hashicorpNode;
   private final String azureKeyVault;
   private final Path multiKeySignerDirectory;
 
-  public SignerParamsSupplier(
+  public TransactionSignerParamsSupplier(
       final HashicorpSigningParams hashicorpNode,
       final String azureKeyVault,
       final Path multiKeySignerDirectory) {
@@ -88,6 +88,8 @@ public class SignerParamsSupplier {
       params.add(System.getenv("ETHSIGNER_AZURE_CLIENT_ID"));
       params.add("--client-secret-path");
       params.add(createAzureSecretFile().getAbsolutePath());
+      params.add("--tenant-id");
+      params.add(System.getenv("ETHSIGNER_AZURE_TENANT_ID"));
     } else if (multiKeySignerDirectory != null) {
       params.add("multikey-signer");
       params.add("--directory");

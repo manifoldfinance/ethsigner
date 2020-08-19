@@ -239,6 +239,11 @@ allprojects {
     }
 
     useJUnitPlatform()
+
+    testLogging {
+      outputs.upToDateWhen {false}
+      showStandardStreams = false //true for std output of tests
+    }
   }
 
   javadoc {
@@ -347,6 +352,7 @@ subprojects {
   dependencies {
     testImplementation sourceSets.testSupport.output
     integrationTestImplementation sourceSets.testSupport.output
+    compile fileTree(dir: "${rootDir}/libs", include: "*.jar")
   }
 
   task integrationTest(type: Test, dependsOn: ["compileTestJava"]) {
@@ -432,8 +438,8 @@ startScripts {
 }
 
 dependencies {
+  compile fileTree(dir: "${rootDir}/libs", include: "*.jar")
   compile project(':ethsigner:app')
-  runtime fileTree(dir: "${rootDir}/libs", include: "*.jar")
   errorprone 'com.google.errorprone:error_prone_core'
 }
 

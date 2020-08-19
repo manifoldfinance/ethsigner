@@ -28,8 +28,7 @@ public abstract class SignerSubCommand implements Runnable {
 
   @CommandLine.ParentCommand private EthSignerBaseCommand config;
 
-  public abstract SignerProvider createSignerFactory()
-      throws SignerInitializationException;
+  public abstract SignerProvider createSignerFactory() throws SignerInitializationException;
 
   public abstract String getCommandName();
 

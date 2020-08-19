@@ -15,10 +15,12 @@ package tech.pegasys.ethsigner.core.signing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static tech.pegasys.ethsigner.support.PublicKeyUtils.createKeyFrom;
 
-import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
 import tech.pegasys.signers.secp256k1.api.Signer;
+import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
 
+import java.security.interfaces.ECPublicKey;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -26,53 +28,52 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class SingleSignerProviderTest {
+class SingleTransactionSignerProviderTest {
 
-  private Signer Signer;
+  private Signer transactionSigner;
   private SingleSignerProvider signerFactory;
 
   @BeforeEach
   void beforeEach() {
-    Signer = mock(Signer.class);
-    signerFactory = new SingleSignerProvider(Signer);
+    transactionSigner = mock(Signer.class);
+    signerFactory = new SingleSignerProvider(transactionSigner);
   }
 
   @Test
   void whenSignerIsNullFactoryCreationFails() {
-    Assertions.assertThrows(
-        IllegalArgumentException.class, () -> new SingleSignerProvider(null));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> new SingleSignerProvider(null));
   }
 
   @Test
-  void whenSignerAddressIsNullFactoryAvailableAddressesShouldReturnEmptySet() {
-    when(Signer.getAddress()).thenReturn(null);
+  void whenSignerPublicKeyIsNullFactoryAvailablePublicKeysShouldReturnEmptySet() {
+    when(transactionSigner.getPublicKey()).thenReturn(null);
 
-    final Collection<String> addresses = signerFactory.availableAddresses();
-    assertThat(addresses).isEmpty();
+    final Collection<ECPublicKey> publicKeys = signerFactory.availablePublicKeys();
+    assertThat(publicKeys).isEmpty();
   }
 
   @Test
-  void whenSignerAddressIsNullFactoryGetSignerShouldReturnEmpty() {
-    when(Signer.getAddress()).thenReturn(null);
+  void whenSignerPublicKeyIsNullFactoryGetSignerShouldReturnEmpty() {
+    when(transactionSigner.getPublicKey()).thenReturn(null);
 
-    final Optional<Signer> signer = signerFactory.getSigner("0x0");
+    final Optional<Signer> signer = signerFactory.getSigner(createKeyFrom("0x00"));
     assertThat(signer).isEmpty();
   }
 
   @Test
   void whenGetSignerWithMatchingAccountShouldReturnSigner() {
-    when(Signer.getAddress()).thenReturn("0x0");
+    when(transactionSigner.getPublicKey()).thenReturn(createKeyFrom("0x00"));
 
-    final Optional<Signer> signer = signerFactory.getSigner("0x0");
+    final Optional<Signer> signer = signerFactory.getSigner(createKeyFrom("0x00"));
     assertThat(signer).isNotEmpty();
   }
 
   @Test
-  void getSignerAddressIsCaseInsensitive() {
-    when(Signer.getAddress()).thenReturn("0xa");
+  void getSignerPublicKeyIsCaseInsensitive() {
+    when(transactionSigner.getPublicKey()).thenReturn(createKeyFrom("0xAA"));
 
-    assertThat(signerFactory.getSigner("0xa")).isNotEmpty();
-    assertThat(signerFactory.getSigner("0xA")).isNotEmpty();
+    assertThat(signerFactory.getSigner(createKeyFrom("0xaa"))).isNotEmpty();
+    assertThat(signerFactory.getSigner(createKeyFrom("0xAA"))).isNotEmpty();
   }
 
   @Test
@@ -82,17 +83,17 @@ class SingleSignerProviderTest {
 
   @Test
   void whenGetSignerWithDifferentSignerAccountShouldReturnEmpty() {
-    when(Signer.getAddress()).thenReturn("0x0");
+    when(transactionSigner.getPublicKey()).thenReturn(createKeyFrom("0x00"));
 
-    final Optional<Signer> signer = signerFactory.getSigner("0x1");
+    final Optional<Signer> signer = signerFactory.getSigner(createKeyFrom("0x01"));
     assertThat(signer).isEmpty();
   }
 
   @Test
-  void whenGetAvailableAddressesShouldReturnSignerAddress() {
-    when(Signer.getAddress()).thenReturn("0x0");
+  void whenGetAvailablePublicKeyShouldReturnSignerAddress() {
+    when(transactionSigner.getPublicKey()).thenReturn(createKeyFrom("0x00"));
 
-    final Collection<String> addresses = signerFactory.availableAddresses();
-    assertThat(addresses).containsExactly("0x0");
+    final Collection<ECPublicKey> addresses = signerFactory.availablePublicKeys();
+    assertThat(addresses).containsExactly(createKeyFrom("0x00"));
   }
 }

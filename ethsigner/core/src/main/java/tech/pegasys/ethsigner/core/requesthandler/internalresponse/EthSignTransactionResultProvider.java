@@ -14,8 +14,8 @@ package tech.pegasys.ethsigner.core.requesthandler.internalresponse;
 
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
-import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.TX_SENDER_NOT_AUTHORIZED;
 
+import tech.pegasys.ethsigner.core.AddressIndexedSignerProvider;
 import tech.pegasys.ethsigner.core.jsonrpc.EthSendTransactionJsonParameters;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
@@ -23,10 +23,8 @@ import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.ResultProvider;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.EthTransaction;
 import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Transaction;
-import tech.pegasys.ethsigner.core.util.HexStringComparator;
 import tech.pegasys.signers.secp256k1.api.Signature;
 import tech.pegasys.signers.secp256k1.api.Signer;
-import tech.pegasys.signers.secp256k1.api.SignerProvider;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,15 +42,15 @@ public class EthSignTransactionResultProvider implements ResultProvider<String> 
   private static final Logger LOG = LogManager.getLogger();
 
   private final long chainId;
-  private final SignerProvider SignerProvider;
+  private final AddressIndexedSignerProvider signerProvider;
   private final JsonDecoder decoder;
 
   public EthSignTransactionResultProvider(
       final long chainId,
-      final SignerProvider SignerProvider,
+      final AddressIndexedSignerProvider signerProvider,
       final JsonDecoder decoder) {
     this.chainId = chainId;
-    this.SignerProvider = SignerProvider;
+    this.signerProvider = signerProvider;
     this.decoder = decoder;
   }
 
@@ -73,35 +71,21 @@ public class EthSignTransactionResultProvider implements ResultProvider<String> 
       throw new JsonRpcException(INVALID_PARAMS);
     }
 
-    final Optional<Signer> Signer =
-        SignerProvider.getSigner(transaction.sender());
-
+    final Optional<Signer> Signer = signerProvider.getSigner(transaction.sender());
     if (Signer.isEmpty()) {
       LOG.info("From address ({}) does not match any available account", transaction.sender());
       throw new JsonRpcException(SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT);
     }
 
-    final HexStringComparator comparator = new HexStringComparator();
-    if (comparator.compare(Signer.get().getAddress(), transaction.sender()) != 0) {
-      LOG.info(
-          "Ethereum address derived from identifier ({}) is incorrect value ({})",
-          transaction.sender(),
-          Signer.get().getAddress());
-      throw new JsonRpcException(TX_SENDER_NOT_AUTHORIZED);
-    }
     final byte[] bytesToSign = transaction.rlpEncode(chainId);
-
     final Signature signature = Signer.get().sign(bytesToSign);
-
     final Sign.SignatureData web3jSignature =
         new Sign.SignatureData(
             signature.getV().toByteArray(),
             signature.getR().toByteArray(),
             signature.getS().toByteArray());
-
     final Sign.SignatureData eip155Signature =
         TransactionEncoder.createEip155SignatureData(web3jSignature, chainId);
-
     final byte[] serializedBytes = transaction.rlpEncode(eip155Signature);
     return Numeric.toHexString(serializedBytes);
   }

@@ -16,6 +16,7 @@ import tech.pegasys.ethsigner.core.requesthandler.sendtransaction.transaction.Tr
 import tech.pegasys.signers.secp256k1.api.Signature;
 import tech.pegasys.signers.secp256k1.api.Signer;
 
+import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign.SignatureData;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.utils.Numeric;
@@ -49,6 +50,6 @@ public class TransactionSerializer {
   }
 
   public String getAddress() {
-    return signer.getAddress();
+    return Keys.getAddress(signer.getPublicKey().toString());
   }
 }

@@ -15,10 +15,9 @@ package tech.pegasys.ethsigner.subcommands;
 import tech.pegasys.ethsigner.SignerSubCommand;
 import tech.pegasys.signers.cavium.CaviumConfig;
 import tech.pegasys.signers.cavium.CaviumKeyStoreProvider;
-import tech.pegasys.signers.hsm.HSMConfig;
-import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
 import tech.pegasys.signers.secp256k1.api.Signer;
 import tech.pegasys.signers.secp256k1.api.SignerProvider;
+import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
 import tech.pegasys.signers.secp256k1.cavium.CaviumKeyStoreSignerFactory;
 import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
 
@@ -69,14 +68,14 @@ public class CaviumSubCommand extends SignerSubCommand {
 
   private Signer createSigner() throws SignerInitializationException {
     final CaviumKeyStoreProvider provider =
-        new CaviumKeyStoreProvider(new CaviumConfig(libraryPath != null ? libraryPath.toString() : null, slotPin));
+        new CaviumKeyStoreProvider(
+            new CaviumConfig(libraryPath != null ? libraryPath.toString() : null, slotPin));
     final CaviumKeyStoreSignerFactory factory = new CaviumKeyStoreSignerFactory(provider);
     return factory.createSigner(ethAddress);
   }
 
   @Override
-  public SignerProvider createSignerFactory()
-      throws SignerInitializationException {
+  public SignerProvider createSignerFactory() throws SignerInitializationException {
     return new SingleSignerProvider(createSigner());
   }
 
