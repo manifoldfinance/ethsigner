@@ -13,12 +13,13 @@
 package tech.pegasys.ethsigner.subcommands;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
+import tech.pegasys.signers.cavium.CaviumConfig;
 import tech.pegasys.signers.cavium.CaviumKeyStoreProvider;
-import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.Signer;
+import tech.pegasys.signers.secp256k1.api.SignerProvider;
+import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
 import tech.pegasys.signers.secp256k1.cavium.CaviumKeyStoreSignerFactory;
-import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
+import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
 
 import java.nio.file.Path;
 
@@ -65,17 +66,17 @@ public class CaviumSubCommand extends SignerSubCommand {
       required = true)
   private String ethAddress;
 
-  private TransactionSigner createSigner() throws TransactionSignerInitializationException {
+  private Signer createSigner() throws SignerInitializationException {
     final CaviumKeyStoreProvider provider =
-        new CaviumKeyStoreProvider(libraryPath.toString(), slotPin);
+        new CaviumKeyStoreProvider(
+            new CaviumConfig(libraryPath != null ? libraryPath.toString() : null, slotPin));
     final CaviumKeyStoreSignerFactory factory = new CaviumKeyStoreSignerFactory(provider);
     return factory.createSigner(ethAddress);
   }
 
   @Override
-  public TransactionSignerProvider createSignerFactory()
-      throws TransactionSignerInitializationException {
-    return new SingleTransactionSignerProvider(createSigner());
+  public SignerProvider createSignerFactory() throws SignerInitializationException {
+    return new SingleSignerProvider(createSigner());
   }
 
   @Override

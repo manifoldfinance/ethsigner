@@ -13,11 +13,13 @@
 package tech.pegasys.ethsigner.subcommands;
 
 import tech.pegasys.ethsigner.SignerSubCommand;
-import tech.pegasys.signers.secp256k1.api.SingleTransactionSignerProvider;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
-import tech.pegasys.signers.secp256k1.common.TransactionSignerInitializationException;
-import tech.pegasys.signers.secp256k1.hsm.HSMTransactionSignerFactory;
+import tech.pegasys.signers.hsm.HSMConfig;
+import tech.pegasys.signers.hsm.HSMWalletProvider;
+import tech.pegasys.signers.secp256k1.api.Signer;
+import tech.pegasys.signers.secp256k1.api.SignerProvider;
+import tech.pegasys.signers.secp256k1.api.SingleSignerProvider;
+import tech.pegasys.signers.secp256k1.common.SignerInitializationException;
+import tech.pegasys.signers.secp256k1.hsm.HSMSignerFactory;
 
 import java.nio.file.Path;
 
@@ -71,17 +73,17 @@ public class HSMSubCommand extends SignerSubCommand {
       required = true)
   private String ethAddress;
 
-  private TransactionSigner createSigner() throws TransactionSignerInitializationException {
-    HSMTransactionSignerFactory factory =
-        new HSMTransactionSignerFactory(
-            libraryPath != null ? libraryPath.toString() : null, slotLabel, slotPin);
+  private Signer createSigner() throws SignerInitializationException {
+    final HSMConfig config =
+        new HSMConfig(libraryPath != null ? libraryPath.toString() : null, slotLabel, slotPin);
+    final HSMWalletProvider provider = new HSMWalletProvider(config);
+    final HSMSignerFactory factory = new HSMSignerFactory(provider);
     return factory.createSigner(ethAddress);
   }
 
   @Override
-  public TransactionSignerProvider createSignerFactory()
-      throws TransactionSignerInitializationException {
-    return new SingleTransactionSignerProvider(createSigner());
+  public SignerProvider createSignerFactory() throws SignerInitializationException {
+    return new SingleSignerProvider(createSigner());
   }
 
   @Override

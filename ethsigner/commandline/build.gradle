@@ -20,6 +20,7 @@ dependencies {
   implementation 'com.google.guava:guava'
   implementation 'org.apache.logging.log4j:log4j-api'
   implementation 'org.apache.logging.log4j:log4j-core'
+  implementation 'org.apache.tuweni:tuweni-toml'
 
   runtimeOnly 'org.apache.logging.log4j:log4j-slf4j-impl'
 
@@ -30,10 +31,7 @@ dependencies {
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
-  integrationTestImplementation 'io.rest-assured:rest-assured'
-  integrationTestImplementation 'org.assertj:assertj-core'
-  integrationTestImplementation 'org.mock-server:mockserver-netty'
-  integrationTestImplementation 'org.mockito:mockito-core'
+  testSupportImplementation 'org.assertj:assertj-core'
 }
 
 artifacts {

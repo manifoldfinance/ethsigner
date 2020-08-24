@@ -22,16 +22,18 @@ import static org.mockito.Mockito.mock;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.INVALID_PARAMS;
 import static tech.pegasys.ethsigner.core.jsonrpc.response.JsonRpcError.SIGNING_FROM_IS_NOT_AN_UNLOCKED_ACCOUNT;
 
+import tech.pegasys.ethsigner.core.AddressIndexedSignerProvider;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonDecoder;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequest;
 import tech.pegasys.ethsigner.core.jsonrpc.JsonRpcRequestId;
 import tech.pegasys.ethsigner.core.jsonrpc.exception.JsonRpcException;
 import tech.pegasys.ethsigner.core.requesthandler.internalresponse.EthSignTransactionResultProvider;
+import tech.pegasys.signers.secp256k1.EthPublicKeyUtils;
 import tech.pegasys.signers.secp256k1.api.Signature;
-import tech.pegasys.signers.secp256k1.api.TransactionSigner;
-import tech.pegasys.signers.secp256k1.api.TransactionSignerProvider;
+import tech.pegasys.signers.secp256k1.api.Signer;
 
 import java.math.BigInteger;
+import java.security.interfaces.ECPublicKey;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +51,7 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 
 public class EthSignTransactionResultProviderTest {
@@ -70,7 +73,8 @@ public class EthSignTransactionResultProviderTest {
   @NullSource
   public void ifParamIsInvalidExceptionIsThrownWithInvalidParams(final Object params) {
 
-    final TransactionSignerProvider mockSignerProvider = mock(TransactionSignerProvider.class);
+    final AddressIndexedSignerProvider mockSignerProvider =
+        mock(AddressIndexedSignerProvider.class);
     final EthSignTransactionResultProvider resultProvider =
         new EthSignTransactionResultProvider(chainId, mockSignerProvider, jsonDecoder);
 
@@ -86,7 +90,8 @@ public class EthSignTransactionResultProviderTest {
 
   @Test
   public void ifAddressIsNotUnlockedExceptionIsThrownWithSigningNotUnlocked() {
-    final TransactionSignerProvider mockSignerProvider = mock(TransactionSignerProvider.class);
+    final AddressIndexedSignerProvider mockSignerProvider =
+        mock(AddressIndexedSignerProvider.class);
     final EthSignTransactionResultProvider resultProvider =
         new EthSignTransactionResultProvider(chainId, mockSignerProvider, jsonDecoder);
 
@@ -101,14 +106,19 @@ public class EthSignTransactionResultProviderTest {
 
   @Test
   public void signatureHasTheExpectedFormat() {
-    final TransactionSigner mockTransactionSigner = mock(TransactionSigner.class);
-    doReturn("0xf17f52151ebef6c7334fad080c5704d77216b732").when(mockTransactionSigner).getAddress();
+    Credentials cs =
+        Credentials.create("0x1618fc3e47aec7e70451256e033b9edb67f4c469258d8e2fbb105552f141ae41");
+    final ECPublicKey key = EthPublicKeyUtils.createPublicKey(cs.getEcKeyPair().getPublicKey());
+
+    final Signer mockSigner = mock(Signer.class);
+    doReturn(key).when(mockSigner).getPublicKey();
     final BigInteger v = BigInteger.ONE;
     final BigInteger r = BigInteger.TWO;
     final BigInteger s = BigInteger.TEN;
-    doReturn(new Signature(v, r, s)).when(mockTransactionSigner).sign(any(byte[].class));
-    final TransactionSignerProvider mockSignerProvider = mock(TransactionSignerProvider.class);
-    doReturn(Optional.of(mockTransactionSigner)).when(mockSignerProvider).getSigner(anyString());
+    doReturn(new Signature(v, r, s)).when(mockSigner).sign(any(byte[].class));
+    final AddressIndexedSignerProvider mockSignerProvider =
+        mock(AddressIndexedSignerProvider.class);
+    doReturn(Optional.of(mockSigner)).when(mockSignerProvider).getSigner(anyString());
     final EthSignTransactionResultProvider resultProvider =
         new EthSignTransactionResultProvider(chainId, mockSignerProvider, jsonDecoder);
 
@@ -127,10 +137,11 @@ public class EthSignTransactionResultProviderTest {
   public void returnsExpectedSignature() {
     Credentials cs =
         Credentials.create("0x1618fc3e47aec7e70451256e033b9edb67f4c469258d8e2fbb105552f141ae41");
-    String addr = cs.getAddress();
+    final ECPublicKey key = EthPublicKeyUtils.createPublicKey(cs.getEcKeyPair().getPublicKey());
+    final String addr = Keys.getAddress(EthPublicKeyUtils.toHexString(key));
 
-    final TransactionSigner mockTransactionSigner = mock(TransactionSigner.class);
-    doReturn(addr).when(mockTransactionSigner).getAddress();
+    final Signer mockSigner = mock(Signer.class);
+    doReturn(key).when(mockSigner).getPublicKey();
 
     doAnswer(
             answer -> {
@@ -142,10 +153,11 @@ public class EthSignTransactionResultProviderTest {
                   new BigInteger(1, signature.getR()),
                   new BigInteger(1, signature.getS()));
             })
-        .when(mockTransactionSigner)
+        .when(mockSigner)
         .sign(any(byte[].class));
-    final TransactionSignerProvider mockSignerProvider = mock(TransactionSignerProvider.class);
-    doReturn(Optional.of(mockTransactionSigner)).when(mockSignerProvider).getSigner(anyString());
+    final AddressIndexedSignerProvider mockSignerProvider =
+        mock(AddressIndexedSignerProvider.class);
+    doReturn(Optional.of(mockSigner)).when(mockSignerProvider).getSigner(anyString());
     final EthSignTransactionResultProvider resultProvider =
         new EthSignTransactionResultProvider(chainId, mockSignerProvider, jsonDecoder);
 

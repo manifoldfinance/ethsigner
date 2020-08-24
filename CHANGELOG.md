@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.1-ADHARA
+
+### Features Added
+- Added "eth_signTransaction" JSON RPC
+- Added AWS CloudHSM signer
+- Added Generic PKCS11 signer
+
 ## 0.7.0
 
 ### Features Added
