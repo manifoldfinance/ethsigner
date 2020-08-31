@@ -22,10 +22,6 @@ dependencyManagement {
 
     dependency 'com.google.guava:guava:28.2-jre'
 
-    dependency 'com.microsoft.aad:adal4j:0.0.2'
-
-    dependency 'com.microsoft.azure:azure-keyvault:1.2.2'
-
     dependency 'com.squareup.okhttp3:okhttp:4.3.1'
 
     dependency 'commons-cli:commons-cli:1.4'
