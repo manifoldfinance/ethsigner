@@ -56,8 +56,6 @@ public class EthSignTransactionResultProvider implements ResultProvider<String> 
 
   @Override
   public String createResponseResult(final JsonRpcRequest request) {
-    // Signs a transaction that can be submitted to the network at a later time using with
-    // eth_sendRawTransaction.
     LOG.debug("Transforming request {}, {}", request.getId(), request.getMethod());
     final Transaction transaction;
     try {
@@ -71,6 +69,7 @@ public class EthSignTransactionResultProvider implements ResultProvider<String> 
       throw new JsonRpcException(INVALID_PARAMS);
     }
 
+    LOG.debug("Obtaining signer for {}", transaction.sender());
     final Optional<Signer> Signer = signerProvider.getSigner(transaction.sender());
     if (Signer.isEmpty()) {
       LOG.info("From address ({}) does not match any available account", transaction.sender());
