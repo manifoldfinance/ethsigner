@@ -72,7 +72,6 @@ public class EthSignTransactionResultProviderTest {
   @ArgumentsSource(InvalidParamsProvider.class)
   @NullSource
   public void ifParamIsInvalidExceptionIsThrownWithInvalidParams(final Object params) {
-
     final AddressIndexedSignerProvider mockSignerProvider =
         mock(AddressIndexedSignerProvider.class);
     final EthSignTransactionResultProvider resultProvider =
@@ -106,7 +105,7 @@ public class EthSignTransactionResultProviderTest {
 
   @Test
   public void signatureHasTheExpectedFormat() {
-    Credentials cs =
+    final Credentials cs =
         Credentials.create("0x1618fc3e47aec7e70451256e033b9edb67f4c469258d8e2fbb105552f141ae41");
     final ECPublicKey key = EthPublicKeyUtils.createPublicKey(cs.getEcKeyPair().getPublicKey());
 
@@ -134,8 +133,27 @@ public class EthSignTransactionResultProviderTest {
   }
 
   @Test
+  public void nonceNotProvidedExceptionIsThrownWithInvalidParams() {
+    final AddressIndexedSignerProvider mockSignerProvider =
+        mock(AddressIndexedSignerProvider.class);
+    final EthSignTransactionResultProvider resultProvider =
+        new EthSignTransactionResultProvider(chainId, mockSignerProvider, jsonDecoder);
+
+    final JsonObject params = getTxParameters();
+    params.remove("nonce");
+    final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_signTransaction");
+    final int id = 1;
+    request.setId(new JsonRpcRequestId(id));
+    request.setParams(params);
+    final Throwable thrown = catchThrowable(() -> resultProvider.createResponseResult(request));
+    assertThat(thrown).isInstanceOf(JsonRpcException.class);
+    final JsonRpcException rpcException = (JsonRpcException) thrown;
+    assertThat(rpcException.getJsonRpcError()).isEqualTo(INVALID_PARAMS);
+  }
+
+  @Test
   public void returnsExpectedSignature() {
-    Credentials cs =
+    final Credentials cs =
         Credentials.create("0x1618fc3e47aec7e70451256e033b9edb67f4c469258d8e2fbb105552f141ae41");
     final ECPublicKey key = EthPublicKeyUtils.createPublicKey(cs.getEcKeyPair().getPublicKey());
     final String addr = Keys.getAddress(EthPublicKeyUtils.toHexString(key));
@@ -161,7 +179,7 @@ public class EthSignTransactionResultProviderTest {
     final EthSignTransactionResultProvider resultProvider =
         new EthSignTransactionResultProvider(chainId, mockSignerProvider, jsonDecoder);
 
-    JsonObject params = getTxParameters();
+    final JsonObject params = getTxParameters();
     params.put("from", addr);
     final JsonRpcRequest request = new JsonRpcRequest("2.0", "eth_signTransaction");
     final int id = 1;
