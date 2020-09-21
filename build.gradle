@@ -36,7 +36,7 @@ if (!JavaVersion.current().java11Compatible) {
   "  Detected version ${JavaVersion.current()}")
 }
 
-def dockerRepo = "adharaprojects"
+def dockerRepo = "adharatech"
 
 def bintrayUser = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
 def bintrayKey = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_KEY')
