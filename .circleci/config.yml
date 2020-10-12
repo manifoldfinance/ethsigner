@@ -7,7 +7,10 @@ orbs:
 executors:
   executor_med:  # 2cpu, 4G ram
     docker:
-      - image: circleci/openjdk:11.0.4-jdk-stretch
+      - image: circleci/openjdk:11.0.8-jdk-buster
+        auth:
+          username: $DOCKER_USER_RO
+          password: $DOCKER_PASSWORD_RO             
     resource_class: medium
     working_directory: ~/project
     environment:
@@ -16,7 +19,10 @@ executors:
 
   executor_large: # 4cpu, 8G ram
     docker:
-      - image: circleci/openjdk:11.0.4-jdk-stretch
+      - image: circleci/openjdk:11.0.8-jdk-buster
+        auth:
+          username: $DOCKER_USER_RO
+          password: $DOCKER_PASSWORD_RO     
     resource_class: large
     working_directory: ~/project
     environment:
@@ -25,7 +31,7 @@ executors:
 
   executor_machine: # 2cpu , 8G ram
     machine:
-      image: ubuntu-1604:201903-01 #Ubuntu 16.04, docker 18.09.3, docker-compose 1.23.1
+      image: ubuntu-2004:202008-01 #Ubuntu 20.04, docker 19.03, docker-compose 1.27.4
       docker_layer_caching: true
     working_directory: ~/project
     environment:
@@ -178,7 +184,7 @@ jobs:
       - run:
           name: Publish Docker
           command: |
-            docker login --username "${DOCKER_USER}" --password "${DOCKER_PASSWORD}"
+            docker login --username "${DOCKER_USER_RW}" --password "${DOCKER_PASSWORD_RW}"
             ./gradlew --no-daemon --parallel "-Pbranch=${CIRCLE_BRANCH}" dockerUpload
       - notify
       
@@ -193,19 +199,29 @@ workflows:
               only:
                 - master
     jobs:
-      - build
+      - build:
+          context:
+            - dockerhub-quorumengineering-ro              
       - acceptanceTests:
           requires:
             - build
+          context:
+            - dockerhub-quorumengineering-ro                    
   default:
     jobs:
-      - build
+      - build:
+          context:
+            - dockerhub-quorumengineering-ro              
       - acceptanceTests:
           requires:
             - build
+          context:
+            - dockerhub-quorumengineering-ro                    
       - buildDocker:
           requires:
             - build
+          context:
+            - dockerhub-quorumengineering-ro                    
       - publish:
           filters:
             branches:
@@ -215,6 +231,9 @@ workflows:
           requires:
             - build
             - acceptanceTests
+          context:
+            - dockerhub-quorumengineering-ro   
+            - quorum-gradle                 
       - publishDocker:
           filters:
             branches:
@@ -225,3 +244,5 @@ workflows:
             - build
             - acceptanceTests
             - buildDocker
+          context:
+            - dockerhub-quorumengineering-rw        
